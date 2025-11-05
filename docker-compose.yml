@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: proyecto_guate_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=${DATABASE_URL:-mysql+mysqlconnector://root:password@db:3306/propiedades}
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    networks:
+      - proyecto_guate_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: proyecto_guate_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - proyecto_guate_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  ollama:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ollama
+    container_name: proyecto_guate_ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+      - MODEL_NAME=llama3.2:3b
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - proyecto_guate_network
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+
+  db:
+    image: mysql:8.0
+    container_name: proyecto_guate_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-propiedades}
+      MYSQL_USER: ${MYSQL_USER:-user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/persistencia/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./backend/persistencia/seed_data.sql:/docker-entrypoint-initdb.d/02-seed_data.sql
+    networks:
+      - proyecto_guate_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  proyecto_guate_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+  ollama_data:
+    driver: local

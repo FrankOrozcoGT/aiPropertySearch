@@ -8,6 +8,15 @@ Sistema inteligente que traduce consultas en lenguaje natural a SQL. Busca propi
 "Casas de 3 habitaciones en zona 10" → SQL generado automáticamente → Resultados
 ```
 
+## 📂 Repositorios del Proyecto
+
+| Componente | Repositorio |
+|-----------|-------------|
+| **Orquestación (Este)** | [aiPropertySearch](https://github.com/FrankOrozcoGT/aiPropertySearch) |
+| **Backend (FastAPI + Ollama)** | [aiPropertySearch-backend](https://github.com/FrankOrozcoGT/aiPropertySearch-backend) |
+| **Frontend (Vue.js 3)** | [aiPropertySearch-frontend](https://github.com/FrankOrozcoGT/aiPropertySearch-frontend) |
+
+
 ## ✨ Características Principales
 
 - 🤖 **IA Integrada**: Ollama LLM traduce lenguaje natural a SQL

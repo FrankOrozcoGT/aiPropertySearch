@@ -430,6 +430,7 @@ MIT
 
 - **Backend:** https://github.com/FrankOrozcoGT/aiPropertySearch-backend
 - **Frontend:** https://github.com/FrankOrozcoGT/aiPropertySearch-frontend
+- **video:** https://youtu.be/9FHBESj1Yfk
 
 ---
 
